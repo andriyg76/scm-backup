@@ -2,6 +2,7 @@ package os
 
 import (
 	"bufio"
+	errors2 "errors"
 	"fmt"
 	log "github.com/andriyg76/glogger"
 	"io"
@@ -67,25 +68,28 @@ func execCmdInt(params params, acmd string, args ...string) error {
 		return err
 	}
 
-	var result chan error
+	var result chan error = make(chan error)
 	go func() {
 		result <- cmd.Wait()
+		close(result)
 	}()
 
 	// Start a timer
 	timer := time.After(timeout)
 	select {
 	case err := <-result:
+		log.Trace("Process finished, error: %s", err)
 		log.Info("Read text: %s", lines)
 		if nil != err {
-			err := fmt.Errorf("Error starting program: %s, %v", cmd.Path, err.Error())
-			if exiterr, ok := err.(*exec.ExitError); ok {
+			var exiterr *exec.ExitError
+			if errors2.As(err, &exiterr) {
 				for _, c := range params.ok {
 					if c == exiterr.ExitCode() {
 						return nil
 					}
 				}
 			}
+			err := fmt.Errorf("error starting program: %s, %v", cmd.Path, err.Error())
 			log.Error("%s", err)
 			return err
 		}
@@ -93,6 +97,8 @@ func execCmdInt(params params, acmd string, args ...string) error {
 	case <-timer:
 		// Timeout happened first, kill the process and print a message.
 		cmd.Process.Kill()
-		return fmt.Errorf("command timed out")
+		err := fmt.Errorf("command %s timed out", cmd.Path)
+		log.Error("Timeout happened %s", err)
+		return err
 	}
 }

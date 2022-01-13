@@ -31,5 +31,5 @@ func TestExecOkNoNull(t *testing.T) {
 	glogger.SetLevel(glogger.TRACE)
 
 	err := execCmdInt(params{timeoutSeconds: 3, ok: []int{1}}, "bash", "-x", "-c", "false")
-	assert.Error(t, err)
+	assert.Nil(t, err)
 }
