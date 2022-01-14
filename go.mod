@@ -1,7 +1,7 @@
 module github.com/andiryg76/scm_backup
 
 require (
-	github.com/andriyg76/glogger v0.1.2
+	github.com/andriyg76/glogger v0.1.3
 	github.com/stretchr/testify v1.3.0
 )
 
