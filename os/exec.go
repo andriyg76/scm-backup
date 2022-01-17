@@ -93,7 +93,7 @@ func execCmdInt(params intParams, acmd string, args ...string) (error, []string)
 	select {
 	case err := <-result:
 		log.Trace("Process finished, error: %s", err)
-		log.Info("Read text: %v", lines)
+		log.Debug("%s Read text: %v", cmd.Path, lines)
 		if nil != err {
 			var exiterr *exec.ExitError
 			if errors2.As(err, &exiterr) {
