@@ -2,6 +2,8 @@ github.com/andriyg76/glogger v0.1.2 h1:68YuPCcUFcFZhJGfLNUUzFB9j1XEutBG6z9XhpHhu
 github.com/andriyg76/glogger v0.1.2/go.mod h1:1snbyjSXux9lyebN74GOgIIROEWDqLp3MBVeCgW6Rwg=
 github.com/andriyg76/glogger v0.1.3 h1:J4JeEfODoPAp3VGdZq9AGaRpNLwFwYwj+mVo575cM4I=
 github.com/andriyg76/glogger v0.1.3/go.mod h1:1snbyjSXux9lyebN74GOgIIROEWDqLp3MBVeCgW6Rwg=
+github.com/andriyg76/glogger v0.1.4 h1:ZezvfTFE8O73KPrzUvvjUanxccxXjAb5ZRtC6TjgHPw=
+github.com/andriyg76/glogger v0.1.4/go.mod h1:1snbyjSXux9lyebN74GOgIIROEWDqLp3MBVeCgW6Rwg=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
