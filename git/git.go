@@ -96,10 +96,10 @@ func Check(dir string) error {
 					return fmt.Errorf("invalid remote url %s: %s", remote, err)
 				}
 				remote = url.Scheme + "://" + url.Host
-				if err, _ := os.ExecCmd(params, "git", "config", "--global", "credential.\""+remote+"\".username", Username); err != nil {
+				if err, _ := os.ExecCmd(params, "git", "config", "--global", "credential."+remote+".username", Username); err != nil {
 					return fmt.Errorf("could not set git credenials helper for %s: %s", remote, err)
 				}
-				if err, _ := os.ExecCmd(params, "git", "config", "--global", "credential.\""+remote+"\".helper",
+				if err, _ := os.ExecCmd(params, "git", "config", "--global", "credential."+remote+".helper",
 					fmt.Sprintf("!f() { test \"$1\" = get && echo \"password=%s\"; }; f", Password)); err != nil {
 					return fmt.Errorf("could not set git credenials helper for %s: %s", remote, err)
 				}
