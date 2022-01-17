@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"github.com/andiryg76/scm_backup/git"
-	"github.com/andiryg76/scm_backup/ssh"
 	log "github.com/andriyg76/glogger"
+	"github.com/andriyg76/scm-backup/git"
+	"github.com/andriyg76/scm-backup/ssh"
 	"strings"
 )
 

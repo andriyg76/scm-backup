@@ -1,9 +1,9 @@
 package ssh
 
 import (
-	"github.com/andiryg76/scm_backup/lists"
-	"github.com/andiryg76/scm_backup/os"
 	"github.com/andriyg76/glogger"
+	"github.com/andriyg76/scm-backup/lists"
+	"github.com/andriyg76/scm-backup/os"
 	os2 "os"
 	"strings"
 )

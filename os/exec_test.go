@@ -1,8 +1,8 @@
 package os
 
 import (
-	list2 "github.com/andiryg76/scm_backup/lists"
 	"github.com/andriyg76/glogger"
+	list2 "github.com/andriyg76/scm-backup/lists"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

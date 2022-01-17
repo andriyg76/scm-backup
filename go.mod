@@ -1,4 +1,4 @@
-module github.com/andiryg76/scm_backup
+module github.com/andriyg76/scm-backup
 
 require (
 	github.com/andriyg76/glogger v0.1.4
