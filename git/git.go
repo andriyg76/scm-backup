@@ -89,7 +89,7 @@ func Check(dir string) error {
 	} else {
 		if len(out) > 0 && len(strings.TrimSpace(out[0])) > 1 {
 			remote := strings.TrimSpace(out[0])
-			if strings.HasPrefix(remote, "http://") || strings.HasPrefix(remote, "htt://") {
+			if strings.HasPrefix(remote, "http://") || strings.HasPrefix(remote, "https://") {
 				if err, _ := os.ExecCmd(params, "git", "config", "--global", "credential.\""+Username+"\".username", Username); err != nil {
 					return fmt.Errorf("could not set git credenials helper for %s: %s", remote, err)
 				}
