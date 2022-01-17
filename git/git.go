@@ -71,8 +71,10 @@ func Backup(dir string) error {
 func traceGitconfig() {
 	if glogger.IsTrace() {
 		home, err := os2.UserHomeDir()
-		if err != nil {
+		if err == nil {
 			_, _ = os.ExecCmd(os.ExecParams{}, "cat", home+"/.gitconfig") // Trace ~/.gitconfig
+		} else {
+			glogger.Error("Can't get user home dir %s", err)
 		}
 	}
 }
