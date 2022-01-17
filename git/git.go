@@ -5,6 +5,7 @@ import (
 	"github.com/andiryg76/scm_backup/lists"
 	"github.com/andiryg76/scm_backup/os"
 	"github.com/andriyg76/glogger"
+	"net/url"
 	os2 "os"
 	"strings"
 )
@@ -90,6 +91,11 @@ func Check(dir string) error {
 		if len(out) > 0 && len(strings.TrimSpace(out[0])) > 1 {
 			remote := strings.TrimSpace(out[0])
 			if strings.HasPrefix(remote, "http://") || strings.HasPrefix(remote, "https://") {
+				url, err := url.Parse(remote)
+				if err != nil {
+					return fmt.Errorf("invalid remote url %s: %s", remote, err)
+				}
+				remote = url.Scheme + "://" + url.Host
 				if err, _ := os.ExecCmd(params, "git", "config", "--global", "credential.\""+remote+"\".username", Username); err != nil {
 					return fmt.Errorf("could not set git credenials helper for %s: %s", remote, err)
 				}
