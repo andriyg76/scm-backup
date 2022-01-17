@@ -43,6 +43,9 @@ func CheckUser(name, email string) error {
 		}
 	}
 	glogger.Debug("Git user email=%s, name=%s", email, name)
+
+	traceGitconfig()
+
 	return nil
 }
 
@@ -61,7 +64,15 @@ func Backup(dir string) error {
 	if err, _ := os.ExecCmd(os.ExecParams{Dir: dir}, "git", "push", "-q"); err != nil {
 		return err
 	}
+
 	return nil
+}
+
+func traceGitconfig() {
+	home, err := os2.UserHomeDir()
+	if err != nil {
+		_, _ = os.ExecCmd(os.ExecParams{}, "cat", home+"/.gitconfig") // Trace ~/.gitconfig
+	}
 }
 
 func Check(dir string) error {
@@ -87,11 +98,8 @@ func Check(dir string) error {
 			glogger.Warn("Git directory %s does not have remote origin set", dir)
 		}
 	}
-
-	home, err := os2.UserHomeDir()
-	if err != nil {
-		_, _ = os.ExecCmd(params, "cat", home+"/.gitconfig") // Trace ~/.gitconfig
-	}
+	
+	traceGitconfig()
 
 	if err, _ := os.ExecCmd(params, "git", "pull", "-q"); err != nil {
 		return err
