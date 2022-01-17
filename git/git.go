@@ -69,9 +69,11 @@ func Backup(dir string) error {
 }
 
 func traceGitconfig() {
-	home, err := os2.UserHomeDir()
-	if err != nil {
-		_, _ = os.ExecCmd(os.ExecParams{}, "cat", home+"/.gitconfig") // Trace ~/.gitconfig
+	if glogger.IsTrace() {
+		home, err := os2.UserHomeDir()
+		if err != nil {
+			_, _ = os.ExecCmd(os.ExecParams{}, "cat", home+"/.gitconfig") // Trace ~/.gitconfig
+		}
 	}
 }
 
@@ -98,7 +100,7 @@ func Check(dir string) error {
 			glogger.Warn("Git directory %s does not have remote origin set", dir)
 		}
 	}
-	
+
 	traceGitconfig()
 
 	if err, _ := os.ExecCmd(params, "git", "pull", "-q"); err != nil {
