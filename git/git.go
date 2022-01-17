@@ -5,6 +5,7 @@ import (
 	"github.com/andiryg76/scm_backup/lists"
 	"github.com/andiryg76/scm_backup/os"
 	"github.com/andriyg76/glogger"
+	os2 "os"
 	"strings"
 )
 
@@ -86,6 +87,12 @@ func Check(dir string) error {
 			glogger.Warn("Git directory %s does not have remote origin set", dir)
 		}
 	}
+
+	home, err := os2.UserHomeDir()
+	if err != nil {
+		_, _ = os.ExecCmd(params, "cat", home+"/.gitconfig") // Trace ~/.gitconfig
+	}
+
 	if err, _ := os.ExecCmd(params, "git", "pull", "-q"); err != nil {
 		return err
 	}
