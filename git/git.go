@@ -100,7 +100,7 @@ func Check(dir string) error {
 					return fmt.Errorf("could not set git credenials helper for %s: %s", remote, err)
 				}
 				if err, _ := os.ExecCmd(params, "git", "config", "--global", "credential.\""+remote+"\".helper",
-					fmt.Sprintf("!f() { test \"$1\" = get && echo \"password=%s\"; }; ", Password)); err != nil {
+					fmt.Sprintf("!f() { test \"$1\" = get && echo \"password=%s\"; }; f();", Password)); err != nil {
 					return fmt.Errorf("could not set git credenials helper for %s: %s", remote, err)
 				}
 			}
