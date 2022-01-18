@@ -5,6 +5,7 @@ import (
 	log "github.com/andriyg76/glogger"
 	"github.com/andriyg76/scm-backup/git"
 	"github.com/andriyg76/scm-backup/ssh"
+	"path/filepath"
 	"strings"
 )
 
@@ -16,15 +17,8 @@ var trace, debug bool
 
 func init() {
 	flag.StringVar(&directoriesStr, "directories", ".", "list of directories to process, split by ','")
-	for _, d := range strings.Split(directoriesStr, ",") {
-		d = strings.TrimSpace(d)
-
-		if d != "" {
-			directories = append(directories, d)
-		}
-	}
-	flag.StringVar(&gitUser, "git_user", "git", "git actor username")
-	flag.StringVar(&gitEmail, "git_email", "email", "git actor email")
+	flag.StringVar(&gitUser, "git_user", "", "git actor username")
+	flag.StringVar(&gitEmail, "git_email", "", "git actor email")
 	flag.StringVar(&git.Username, "git_login", "", "git http/s username")
 	flag.StringVar(&git.Password, "git_password", "", "git http/s password")
 	flag.StringVar(&sshKey, "ssh_private_key", "", "ssh private key")
@@ -32,6 +26,14 @@ func init() {
 	flag.BoolVar(&trace, "trace", false, "trace logs")
 	flag.BoolVar(&debug, "debug", false, "debug logs")
 	flag.Parse()
+
+	for _, d := range strings.Split(directoriesStr, ",") {
+		d = strings.TrimSpace(d)
+
+		if d != "" {
+			directories = append(directories, d)
+		}
+	}
 }
 
 func main() {
@@ -39,6 +41,21 @@ func main() {
 		log.SetLevel(log.TRACE)
 	} else if debug {
 		log.SetLevel(log.DEBUG)
+	}
+
+	log.Debug("Backuping directories: %s", directories)
+	abs, _ := filepath.Abs(".")
+	log.Debug("Base directory: %s", abs)
+	log.Debug("Log level: %s", log.Default())
+	if sshKey != "" {
+		keyPwd := ""
+		if sshKeyPassword != "" {
+			keyPwd = "(with keypassword)"
+		}
+		log.Debug("git auth with ssh key %", keyPwd)
+	}
+	if git.Username != "" && git.Password != "" {
+		log.Debug("git auth with ssh key")
 	}
 
 	var agent ssh.SshAgent
