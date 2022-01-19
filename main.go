@@ -10,7 +10,6 @@ import (
 )
 
 var directoriesStr string
-var directories []string
 var gitUser, gitEmail string
 var sshKey, sshKeyPassword string
 var trace, debug bool
@@ -25,8 +24,12 @@ func init() {
 	flag.StringVar(&sshKeyPassword, "ssh_key_password", "", "ssh private key")
 	flag.BoolVar(&trace, "trace", false, "trace logs")
 	flag.BoolVar(&debug, "debug", false, "debug logs")
+}
+
+func main() {
 	flag.Parse()
 
+	var directories []string
 	for _, d := range strings.Split(directoriesStr, ",") {
 		d = strings.TrimSpace(d)
 
@@ -34,9 +37,7 @@ func init() {
 			directories = append(directories, d)
 		}
 	}
-}
-
-func main() {
+	
 	if trace {
 		log.SetLevel(log.TRACE)
 	} else if debug {

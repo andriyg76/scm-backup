@@ -1,3 +1,5 @@
+github.com/andriyg76/glog v0.1.6 h1:UluEjz/swpaR0hIOJbQxIeisntwT0DSfVvFvtpWZ/50=
+github.com/andriyg76/glog v0.1.6/go.mod h1:h4lyo4C+Q+FqRrno0Cz56FRgHrrK/dRQ+4PsqQpqBto=
 github.com/andriyg76/glogger v0.1.4 h1:ZezvfTFE8O73KPrzUvvjUanxccxXjAb5ZRtC6TjgHPw=
 github.com/andriyg76/glogger v0.1.4/go.mod h1:1snbyjSXux9lyebN74GOgIIROEWDqLp3MBVeCgW6Rwg=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=

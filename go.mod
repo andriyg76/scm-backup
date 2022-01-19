@@ -1,6 +1,7 @@
 module github.com/andriyg76/scm-backup
 
 require (
+	github.com/andriyg76/glog v0.1.6
 	github.com/andriyg76/glogger v0.1.4
 	github.com/stretchr/testify v1.7.0
 )
