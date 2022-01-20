@@ -1,7 +1,7 @@
 package ssh
 
 import (
-	"github.com/andriyg76/glogger"
+	glog "github.com/andriyg76/glog"
 	"github.com/andriyg76/scm-backup/lists"
 	"github.com/andriyg76/scm-backup/os"
 	os2 "os"
@@ -18,7 +18,7 @@ func CheckSshAgentOrRun() (error, SshAgent) {
 
 	sock, pid := os2.Getenv("SSH_AUTH_SOCK"), os2.Getenv("SSH_AGENT_PID")
 	if sock != "" && pid != "" {
-		glogger.Debug("Ssh agent running socket=%s pid=%s", sock, pid)
+		glog.Debug("Ssh agent running socket=%s pid=%s", sock, pid)
 		agent.socket = sock
 		return nil, agent
 	}
@@ -32,7 +32,7 @@ func CheckSshAgentOrRun() (error, SshAgent) {
 
 func (a SshAgent) Stop() {
 	if len(a.env) == 0 {
-		glogger.Trace("Skipping to stop agent")
+		glog.Trace("Skipping to stop agent")
 		return
 	}
 	os.ExecCmd(os.ExecParams{Env: a.env}, "ssh-agent", "-k")

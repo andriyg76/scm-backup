@@ -1,5 +1,5 @@
 replace (
-	github.com/andriyg76/glog => ../glog
+//	github.com/andriyg76/glog => ../glog
 )
 
 use (

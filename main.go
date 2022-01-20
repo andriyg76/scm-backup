@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	log "github.com/andriyg76/glogger"
+	log "github.com/andriyg76/glog"
 	"github.com/andriyg76/scm-backup/git"
 	"github.com/andriyg76/scm-backup/ssh"
 	"path/filepath"
@@ -37,7 +37,7 @@ func main() {
 			directories = append(directories, d)
 		}
 	}
-	
+
 	if trace {
 		log.SetLevel(log.TRACE)
 	} else if debug {

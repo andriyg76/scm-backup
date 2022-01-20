@@ -1,7 +1,7 @@
 package ssh
 
 import (
-	"github.com/andriyg76/glogger"
+	glog "github.com/andriyg76/glog"
 	"github.com/andriyg76/scm-backup/lists"
 	"github.com/andriyg76/scm-backup/os"
 	"github.com/stretchr/testify/assert"
@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	glogger.SetLevel(glogger.TRACE)
+	glog.SetLevel(glog.TRACE)
 }
 func TestParseSshAgentOutput(t *testing.T) {
 	out := lists.String("SSH_AUTH_SOCK=/tmp/ssh-kQN4kvgauzrv/agent.4465; export SSH_AUTH_SOCK;",

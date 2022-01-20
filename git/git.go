@@ -2,7 +2,7 @@ package git
 
 import (
 	"fmt"
-	"github.com/andriyg76/glogger"
+	glog "github.com/andriyg76/glog"
 	"github.com/andriyg76/scm-backup/lists"
 	"github.com/andriyg76/scm-backup/os"
 	"net/url"
@@ -16,7 +16,7 @@ var (
 )
 
 func CheckUser(name, email string) error {
-	glogger.Debug("Ensure git user email %s, name %s", email, name)
+	glog.Debug("Ensure git user email %s, name %s", email, name)
 	if email != "" {
 		err, out := os.ExecCmd(os.ExecParams{Ok: lists.Int(1)}, "git", "config", "--global", "user.email")
 		if err != nil {
@@ -43,7 +43,7 @@ func CheckUser(name, email string) error {
 			name = out[0]
 		}
 	}
-	glogger.Debug("Git user email=%s, name=%s", email, name)
+	glog.Debug("Git user email=%s, name=%s", email, name)
 
 	traceGitconfig()
 
@@ -70,12 +70,12 @@ func Backup(dir string) error {
 }
 
 func traceGitconfig() {
-	if glogger.IsTrace() {
+	if glog.IsTrace() {
 		home, err := os2.UserHomeDir()
 		if err == nil {
 			_, _ = os.ExecCmd(os.ExecParams{}, "cat", home+"/.gitconfig") // Trace ~/.gitconfig
 		} else {
-			glogger.Error("Can't get user home dir %s", err)
+			glog.Error("Can't get user home dir %s", err)
 		}
 	}
 }
@@ -84,7 +84,7 @@ func Check(dir string) error {
 	var params = os.ExecParams{Dir: dir}
 
 	if Username == "" || Password == "" {
-		glogger.Debug("Does not set credentials helper for %s", dir)
+		glog.Debug("Does not set credentials helper for %s", dir)
 	} else if err, out := os.ExecCmd(params, "git", "remote", "get-url", "origin"); err != nil {
 		return fmt.Errorf("could not get remote for git dir %s", dir)
 	} else {
@@ -105,7 +105,7 @@ func Check(dir string) error {
 				}
 			}
 		} else {
-			glogger.Warn("Git directory %s does not have remote origin set", dir)
+			glog.Warn("Git directory %s does not have remote origin set", dir)
 		}
 	}
 

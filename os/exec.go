@@ -4,7 +4,7 @@ import (
 	"bufio"
 	errors2 "errors"
 	"fmt"
-	log "github.com/andriyg76/glogger"
+	log "github.com/andriyg76/glog"
 	"io"
 	"os/exec"
 	"strings"
@@ -74,7 +74,9 @@ func execCmdInt(params intParams, acmd string, args ...string) (error, []string)
 
 	var lines, errors []string
 	go read(stdout, &lines, acmd, log.Debug)
-	go read(stderr, &errors, acmd, log.Error)
+	go read(stderr, &errors, acmd, func(format string, objs ...interface{}) {
+		_ = log.Error(format, objs...)
+	})
 
 	if err := cmd.Start(); err != nil {
 		err = fmt.Errorf("error starting program: %s, %v", cmd.Path, err.Error())
