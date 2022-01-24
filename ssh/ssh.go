@@ -1,9 +1,12 @@
 package ssh
 
 import (
+	"bufio"
+	"fmt"
 	glog "github.com/andriyg76/glog"
 	"github.com/andriyg76/scm-backup/lists"
 	"github.com/andriyg76/scm-backup/os"
+	"io"
 	os2 "os"
 	"strings"
 )
@@ -38,7 +41,22 @@ func (a SshAgent) Stop() {
 	os.ExecCmd(os.ExecParams{Env: a.env}, "ssh-agent", "-k")
 }
 
-func (a SshAgent) AddSshKey(key string, pw string) error {
+func (a SshAgent) AddSshKey(key string, fileName string, pw string) error {
+	if key != "" {
+		if err := a.addKey(key, pw); err != nil {
+			return err
+		}
+	}
+	if fileName != "" {
+		if err := a.addKeyFile(fileName, pw); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (a SshAgent) addKey(key string, pw string) error {
 	var stdin string
 	var args []string
 	if pw != "" { // We are removing passwork from private key and adding it from temporary file then
@@ -65,6 +83,48 @@ func (a SshAgent) AddSshKey(key string, pw string) error {
 		args = lists.String("-")
 	}
 	err, _ := os.ExecCmd(os.ExecParams{Stdin: stdin, Env: a.env}, "ssh-add", args...)
+	return err
+}
+
+func (a SshAgent) addKeyFile(fileName string, pw string) error {
+
+	origin, err2 := os2.OpenFile(fileName, os2.O_RDONLY, 0)
+	if err2 != nil {
+		return fmt.Errorf("can't load original key file %s", err2)
+	}
+
+	// We are  adding key from temporary file, as original could have invalid permissions
+	var err error
+	var file *os2.File
+	file, err = os2.CreateTemp(os2.TempDir(), "key")
+	if err != nil {
+		return err
+	}
+	defer func() {
+		os2.Remove(file.Name())
+	}()
+	file.Chmod(0600)
+
+	for {
+		written, err3 := io.Copy(bufio.NewWriter(file), bufio.NewReader(origin))
+		if err3 == io.EOF || written == 0 {
+			break
+		} else if err3 != nil {
+			return fmt.Errorf("can't copy original key file %s", err3)
+		}
+	}
+	origin.Close()
+	file.Close()
+
+	// We are removing passwork from private key
+	if pw != "" {
+		if err, _ = os.ExecCmd(os.ExecParams{}, "ssh-keygen", "-p", "-P", pw, "-N", "", "-f", file.Name()); err != nil {
+			return err
+		}
+	}
+
+	args := lists.String(file.Name())
+	err, _ = os.ExecCmd(os.ExecParams{Stdin: "", Env: a.env}, "ssh-add", args...)
 	return err
 }
 

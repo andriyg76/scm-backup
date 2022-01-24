@@ -11,7 +11,7 @@ import (
 
 var directoriesStr string
 var gitUser, gitEmail string
-var sshKey, sshKeyPassword string
+var sshKey, sshKeyPassword, sshKeyFile string
 var trace, debug bool
 
 func init() {
@@ -21,6 +21,7 @@ func init() {
 	flag.StringVar(&git.Username, "git_login", "", "git http/s username")
 	flag.StringVar(&git.Password, "git_password", "", "git http/s password")
 	flag.StringVar(&sshKey, "ssh_private_key", "", "ssh private key")
+	flag.StringVar(&sshKeyFile, "ssh_key_file", "", "ssh private key file")
 	flag.StringVar(&sshKeyPassword, "ssh_key_password", "", "ssh private key")
 	flag.BoolVar(&trace, "trace", false, "trace logs")
 	flag.BoolVar(&debug, "debug", false, "debug logs")
@@ -66,7 +67,7 @@ func main() {
 			log.Fatal("Error starting ssh agent, %s", err)
 		}
 		defer agent.Stop()
-		if err = agent.AddSshKey(sshKey, sshKeyPassword); err != nil {
+		if err = agent.AddSshKey(sshKey, sshKeyFile, sshKeyPassword); err != nil {
 			log.Fatal("Error loading ssh key, %s", err)
 		}
 	}

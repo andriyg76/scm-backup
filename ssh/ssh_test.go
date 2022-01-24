@@ -29,15 +29,73 @@ func TestRunAgentAgent(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 2, len(agent.env))
 
-	err = agent.AddSshKey(ssh_key, "")
+	err = agent.AddSshKey(ssh_key, "", "")
 	assert.Nil(t, err)
 
-	err = agent.AddSshKey(ssh_with_pw, ssh_with_pw_pw)
+	err = agent.AddSshKey(ssh_with_pw, "", ssh_with_pw_pw)
 	assert.Nil(t, err)
 
 	err, lines := os.ExecCmd(os.ExecParams{Env: agent.env}, "ssh-add", "-L")
 	assert.Nil(t, err)
 	assert.Equal(t, lists.String(ssh_key_pub, ssh_with_pw_pub), lines)
+
+	agent.Stop()
+}
+
+func TestAddKeyAsFile(t *testing.T) {
+	os2.Setenv("SSH_AUTH_SOCK", "")
+	os2.Setenv("SSH_AGENT_PID", "")
+	err, agent := CheckSshAgentOrRun()
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(agent.env))
+
+	var file *os2.File
+	file, err = os2.CreateTemp(os2.TempDir(), "key")
+	if err != nil {
+		glog.Panic("Can't create temp ssh file")
+	}
+	defer func() {
+		os2.Remove(file.Name())
+	}()
+	file.Chmod(0600)
+	file.WriteString(ssh_key)
+	file.Close()
+
+	err = agent.AddSshKey("", file.Name(), "")
+	assert.Nil(t, err)
+
+	err, lines := os.ExecCmd(os.ExecParams{Env: agent.env}, "ssh-add", "-L")
+	assert.Nil(t, err)
+	assert.Equal(t, lists.String(ssh_key_pub), lines)
+
+	agent.Stop()
+}
+
+func TestAddKeyWithPwAsFile(t *testing.T) {
+	os2.Setenv("SSH_AUTH_SOCK", "")
+	os2.Setenv("SSH_AGENT_PID", "")
+	err, agent := CheckSshAgentOrRun()
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(agent.env))
+
+	var file *os2.File
+	file, err = os2.CreateTemp(os2.TempDir(), "key")
+	if err != nil {
+		glog.Panic("Can't create temp ssh file")
+	}
+	defer func() {
+		os2.Remove(file.Name())
+	}()
+	file.Chmod(0600)
+	file.WriteString(ssh_with_pw)
+	file.Close()
+
+	err = agent.AddSshKey("", file.Name(), ssh_with_pw_pw)
+	assert.Nil(t, err)
+
+	err, lines := os.ExecCmd(os.ExecParams{Env: agent.env}, "ssh-add", "-L")
+	assert.Nil(t, err)
+	assert.Equal(t, lists.String(ssh_with_pw_pub), lines)
 
 	agent.Stop()
 }
