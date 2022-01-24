@@ -13,6 +13,7 @@ import (
 var (
 	Password string
 	Username string
+	Env      []string
 )
 
 func CheckUser(name, email string) error {
@@ -55,14 +56,13 @@ func Backup(dir string) error {
 		return err
 	}
 
-	var params = os.ExecParams{Dir: dir}
-	if err, _ := os.ExecCmd(params, "git", "add", "-A"); err != nil {
+	if err, _ := os.ExecCmd(os.ExecParams{Dir: dir}, "git", "add", "-A"); err != nil {
 		return err
 	}
-	if err, _ := os.ExecCmd(os.ExecParams{Ok: lists.Int(1), Dir: dir}, "git", "commit", "-a", "-q", "-m", "periodic backups"); err != nil {
+	if err, _ := os.ExecCmd(os.ExecParams{Ok: lists.Int(1), Dir: dir, Env: Env}, "git", "commit", "-a", "-q", "-m", "periodic backups"); err != nil {
 		return err
 	}
-	if err, _ := os.ExecCmd(os.ExecParams{Dir: dir}, "git", "push", "-q"); err != nil {
+	if err, _ := os.ExecCmd(os.ExecParams{Dir: dir, Env: Env}, "git", "push", "-q"); err != nil {
 		return err
 	}
 
@@ -81,11 +81,9 @@ func traceGitconfig() {
 }
 
 func Check(dir string) error {
-	var params = os.ExecParams{Dir: dir}
-
 	if Username == "" || Password == "" {
 		glog.Debug("Does not set credentials helper for %s", dir)
-	} else if err, out := os.ExecCmd(params, "git", "remote", "get-url", "origin"); err != nil {
+	} else if err, out := os.ExecCmd(os.ExecParams{Dir: dir}, "git", "remote", "get-url", "origin"); err != nil {
 		return fmt.Errorf("could not get remote for git dir %s", dir)
 	} else {
 		if len(out) > 0 && len(strings.TrimSpace(out[0])) > 1 {
@@ -96,10 +94,10 @@ func Check(dir string) error {
 					return fmt.Errorf("invalid remote url %s: %s", remote, err)
 				}
 				remote = url.Scheme + "://" + url.Host
-				if err, _ := os.ExecCmd(params, "git", "config", "--global", "credential."+remote+".username", Username); err != nil {
+				if err, _ := os.ExecCmd(os.ExecParams{}, "git", "config", "--global", "credential."+remote+".username", Username); err != nil {
 					return fmt.Errorf("could not set git credenials helper for %s: %s", remote, err)
 				}
-				if err, _ := os.ExecCmd(params, "git", "config", "--global", "credential."+remote+".helper",
+				if err, _ := os.ExecCmd(os.ExecParams{}, "git", "config", "--global", "credential."+remote+".helper",
 					fmt.Sprintf("!f() { test \"$1\" = get && echo \"password=%s\"; }; f", Password)); err != nil {
 					return fmt.Errorf("could not set git credenials helper for %s: %s", remote, err)
 				}
@@ -111,7 +109,7 @@ func Check(dir string) error {
 
 	traceGitconfig()
 
-	if err, _ := os.ExecCmd(params, "git", "pull", "-q"); err != nil {
+	if err, _ := os.ExecCmd(os.ExecParams{Dir: dir, Env: Env}, "git", "pull", "-q"); err != nil {
 		return err
 	}
 	return nil
