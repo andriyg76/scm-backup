@@ -7,30 +7,26 @@ import (
 	"testing"
 )
 
-func TestExecTimout(t *testing.T) {
+func init() {
 	glog.SetLevel(glog.TRACE)
+}
 
+func TestExecTimout(t *testing.T) {
 	err, _ := execCmdInt(intParams{timeoutSeconds: 1}, "ping", "localhost")
 	assert.Error(t, err)
 }
 
 func TestExecNoTimout(t *testing.T) {
-	glog.SetLevel(glog.TRACE)
-
 	err, _ := execCmdInt(intParams{timeoutSeconds: 3}, "bash", "-x", "-c", "sleep 1")
 	assert.Nil(t, err)
 }
 
 func TestExecFailure(t *testing.T) {
-	glog.SetLevel(glog.TRACE)
-
 	err, _ := execCmdInt(intParams{timeoutSeconds: 3}, "bash", "-x", "-c", "false")
 	assert.Error(t, err)
 }
 
 func TestExecOkNoNull(t *testing.T) {
-	glog.SetLevel(glog.TRACE)
-
 	err, _ := execCmdInt(intParams{timeoutSeconds: 3, ExecParams: ExecParams{Ok: []int{1}}}, "bash", "-x", "-c", "false")
 	assert.Nil(t, err)
 }
@@ -41,9 +37,8 @@ func TestStdin(t *testing.T) {
 
 	assert.Equal(t, list2.String("ping-pong"), list)
 }
-func TestExecData(t *testing.T) {
-	glog.SetLevel(glog.TRACE)
 
+func TestExecData(t *testing.T) {
 	err, list := execCmdInt(intParams{}, "bash", "-x", "-c",
 		"echo 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 - 1  -;"+
 			"echo 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 - 2  -;"+
@@ -66,4 +61,14 @@ func TestExecData(t *testing.T) {
 		"1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890",
 		"1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890",
 		"the end -"), list)
+}
+
+func TestOverrideEnvironment(t *testing.T) {
+	err, lines1 := execCmdInt(intParams{ExecParams: ExecParams{Env: nil}}, "env")
+	assert.Nil(t, err)
+
+	err, lines2 := execCmdInt(intParams{ExecParams: ExecParams{Env: []string{"VAR=1"}}}, "env")
+	assert.Nil(t, err)
+
+	assert.Equal(t, len(lines1)+1, len(lines2))
 }

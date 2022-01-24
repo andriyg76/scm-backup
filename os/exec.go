@@ -6,6 +6,7 @@ import (
 	"fmt"
 	log "github.com/andriyg76/glog"
 	"io"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -48,9 +49,10 @@ func execCmdInt(params intParams, acmd string, args ...string) (error, []string)
 
 	cmd := exec.Command(acmd, args...)
 	cmd.Dir = params.Dir
-	cmd.Env = params.Env
-
 	log.Trace("command: %s params: %s timeout: %s dir: %s env: %s stdin: %s", acmd, args, timeout, cmd.Dir, cmd.Env, cmd.Stdin)
+	if len(params.Env) > 0 {
+		cmd.Env = append(os.Environ(), params.Env...)
+	}
 
 	log.Debug("executing command %s", acmd)
 	stderr, err := cmd.StderrPipe()
