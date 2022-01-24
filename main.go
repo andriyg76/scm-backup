@@ -61,7 +61,7 @@ func main() {
 	}
 
 	var agent ssh.SshAgent
-	if sshKey != "" {
+	if sshKey != "" || sshKeyFile != "" {
 		var err error
 		if err, agent = ssh.CheckSshAgentOrRun(); err != nil {
 			log.Fatal("Error starting ssh agent, %s", err)
