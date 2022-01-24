@@ -13,7 +13,7 @@ import (
 
 type SshAgent struct {
 	socket string
-	env    []string
+	Env    []string
 }
 
 func CheckSshAgentOrRun() (error, SshAgent) {
@@ -34,11 +34,11 @@ func CheckSshAgentOrRun() (error, SshAgent) {
 }
 
 func (a SshAgent) Stop() {
-	if len(a.env) == 0 {
+	if len(a.Env) == 0 {
 		glog.Trace("Skipping to stop agent")
 		return
 	}
-	os.ExecCmd(os.ExecParams{Env: a.env}, "ssh-agent", "-k")
+	os.ExecCmd(os.ExecParams{Env: a.Env}, "ssh-agent", "-k")
 }
 
 func (a SshAgent) AddSshKey(key string, fileName string, pw string) error {
@@ -82,7 +82,7 @@ func (a SshAgent) addKey(key string, pw string) error {
 		stdin = key
 		args = lists.String("-")
 	}
-	err, _ := os.ExecCmd(os.ExecParams{Stdin: stdin, Env: a.env}, "ssh-add", args...)
+	err, _ := os.ExecCmd(os.ExecParams{Stdin: stdin, Env: a.Env}, "ssh-add", args...)
 	return err
 }
 
@@ -124,7 +124,7 @@ func (a SshAgent) addKeyFile(fileName string, pw string) error {
 	}
 
 	args := lists.String(file.Name())
-	err, _ = os.ExecCmd(os.ExecParams{Stdin: "", Env: a.env}, "ssh-add", args...)
+	err, _ = os.ExecCmd(os.ExecParams{Stdin: "", Env: a.Env}, "ssh-add", args...)
 	return err
 }
 
@@ -141,5 +141,5 @@ func getAgetEnv(out []string) SshAgent {
 			}
 		}
 	}
-	return SshAgent{env: env, socket: socket}
+	return SshAgent{Env: env, socket: socket}
 }

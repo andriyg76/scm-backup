@@ -72,6 +72,7 @@ func main() {
 		}
 	}
 
+	git.Env = agent.Env
 	if e := git.CheckUser(gitUser, gitEmail); e != nil {
 		log.Fatal("Can't initialise git user parameters %s", e)
 	}
