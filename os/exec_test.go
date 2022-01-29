@@ -4,6 +4,7 @@ import (
 	glog "github.com/andriyg76/glog"
 	list2 "github.com/andriyg76/scm-backup/lists"
 	"github.com/stretchr/testify/assert"
+	"runtime"
 	"testing"
 )
 
@@ -12,34 +13,41 @@ func init() {
 }
 
 func TestExecTimout(t *testing.T) {
-	err, _ := execCmdInt(intParams{timeoutSeconds: 1}, "ping", "localhost")
+	err, _ := ExecCmd(ExecParams{TimeoutSeconds: 1}, "ping", "localhost")
 	assert.Error(t, err)
 }
 
 func TestExecNoTimout(t *testing.T) {
-	err, _ := execCmdInt(intParams{timeoutSeconds: 3}, "bash", "-x", "-c", "sleep 1")
+	err, _ := ExecCmd(ExecParams{TimeoutSeconds: 3}, "bash", "-x", "-c", "sleep 1")
 	assert.Nil(t, err)
 }
 
 func TestExecFailure(t *testing.T) {
-	err, _ := execCmdInt(intParams{timeoutSeconds: 3}, "bash", "-x", "-c", "false")
+	err, _ := ExecCmd(ExecParams{TimeoutSeconds: 3}, "bash", "-x", "-c", "false")
 	assert.Error(t, err)
 }
 
 func TestExecOkNoNull(t *testing.T) {
-	err, _ := execCmdInt(intParams{timeoutSeconds: 3, ExecParams: ExecParams{Ok: []int{1}}}, "bash", "-x", "-c", "false")
+	err, _ := ExecCmd(ExecParams{TimeoutSeconds: 3, Ok: []int{1}}, "bash", "-x", "-c", "false")
 	assert.Nil(t, err)
 }
 
 func TestStdin(t *testing.T) {
-	err, list := ExecCmd(ExecParams{Stdin: "ping-pong"}, "cat")
+	cmd := []string{"cat"}
+	if runtime.GOOS == "windows" {
+		cmd = []string{
+			"cmd", "/c", "type con",
+		}
+	}
+
+	err, list := ExecCmd(ExecParams{TimeoutSeconds: 5, Stdin: "ping-pong"}, cmd[0], cmd[1:]...)
 	assert.Nil(t, err)
 
 	assert.Equal(t, list2.String("ping-pong"), list)
 }
 
 func TestExecData(t *testing.T) {
-	err, list := execCmdInt(intParams{}, "bash", "-x", "-c",
+	err, list := ExecCmd(ExecParams{}, "bash", "-x", "-c",
 		"echo 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 - 1  -;"+
 			"echo 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 - 2  -;"+
 			"sleep 0;"+
@@ -64,10 +72,17 @@ func TestExecData(t *testing.T) {
 }
 
 func TestOverrideEnvironment(t *testing.T) {
-	err, lines1 := execCmdInt(intParams{ExecParams: ExecParams{Env: nil}}, "env")
+	cmd := []string{"env"}
+	if runtime.GOOS == "windows" {
+		cmd = []string{
+			"cmd", "/c", "set",
+		}
+	}
+
+	err, lines1 := ExecCmd(ExecParams{Env: nil}, cmd[0])
 	assert.Nil(t, err)
 
-	err, lines2 := execCmdInt(intParams{ExecParams: ExecParams{Env: []string{"VAR=1"}}}, "env")
+	err, lines2 := ExecCmd(ExecParams{Env: []string{"VAR=1"}}, cmd[0])
 	assert.Nil(t, err)
 
 	assert.Equal(t, len(lines1)+1, len(lines2))
