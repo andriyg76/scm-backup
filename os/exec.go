@@ -8,41 +8,29 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 )
 
-func read(reader io.Reader, lines *[]string, prefix string, log func(format string, objs ...interface{})) {
+func read(reader io.Reader, lines *[]string, prefix string, log log.Output) {
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		text := scanner.Text()
-		log("%s: %s", prefix, text)
+		log.Printf("%s: %s", prefix, text)
 		*lines = append(*lines, text)
 	}
 }
 
 type ExecParams struct {
-	Dir   string
-	Ok    []int
-	Env   []string
-	Stdin string
-}
-
-type intParams struct {
-	timoutMinutes  time.Duration
-	timeoutSeconds time.Duration
-	ExecParams
+	Dir            string
+	Ok             []int
+	Env            []string
+	Stdin          string
+	TimoutMinutes  time.Duration
+	TimeoutSeconds time.Duration
 }
 
 func ExecCmd(params ExecParams, acmd string, args ...string) (error, []string) {
-	return execCmdInt(intParams{
-		timoutMinutes: 5,
-		ExecParams:    params,
-	}, acmd, args...)
-}
-
-func execCmdInt(params intParams, acmd string, args ...string) (error, []string) {
-	var timeout = params.timoutMinutes*time.Minute + params.timeoutSeconds*time.Second
+	var timeout = params.TimoutMinutes*time.Minute + params.TimeoutSeconds*time.Second
 	if timeout == 0 {
 		timeout = 5 * time.Minute
 	}
@@ -63,7 +51,17 @@ func execCmdInt(params intParams, acmd string, args ...string) (error, []string)
 	if nil != err {
 		log.Fatal("Error obtaining stdout: %s", err.Error())
 	}
-	cmd.Stdin = strings.NewReader(params.Stdin)
+	if params.Stdin != "" {
+		stdin, err := cmd.StdinPipe()
+		if nil != err {
+			log.Fatal("Error obtaining stdin: %s", err.Error())
+		}
+		go func() {
+			log.Trace("%s %s", acmd+" in", params.Stdin)
+			fmt.Fprintln(stdin, params.Stdin)
+			stdin.Close()
+		}()
+	}
 
 	defer func(pipes ...io.Closer) {
 		for _, f := range pipes {
@@ -75,10 +73,8 @@ func execCmdInt(params intParams, acmd string, args ...string) (error, []string)
 	)
 
 	var lines, errors []string
-	go read(stdout, &lines, acmd, log.Debug)
-	go read(stderr, &errors, acmd, func(format string, objs ...interface{}) {
-		_ = log.Error(format, objs...)
-	})
+	go read(stdout, &lines, acmd+" out", log.OutputLevel(log.TRACE))
+	go read(stderr, &errors, acmd+" err", log.OutputLevel(log.DEBUG))
 
 	if err := cmd.Start(); err != nil {
 		err = fmt.Errorf("error starting program: %s, %v", cmd.Path, err.Error())
@@ -86,7 +82,7 @@ func execCmdInt(params intParams, acmd string, args ...string) (error, []string)
 		return err, nil
 	}
 
-	var result chan error = make(chan error)
+	var result = make(chan error)
 	go func() {
 		result <- cmd.Wait()
 		close(result)
@@ -107,16 +103,16 @@ func execCmdInt(params intParams, acmd string, args ...string) (error, []string)
 					}
 				}
 			}
-			err := fmt.Errorf("error starting program: %s, %v", cmd.Path, err.Error())
-			log.Error("%s", err)
+			err := log.Error("error starting program: %s, %v", cmd.Path, err.Error())
+			log.Error("Stderr: %s", errors)
 			return err, lines
 		}
 		return nil, lines
 	case <-timer:
 		// Timeout happened first, kill the process and print a message.
 		cmd.Process.Kill()
-		err := fmt.Errorf("command %s timed out", cmd.Path)
-		log.Error("Timeout happened %s", err)
+		err := log.Error("command %s timed out, %s", cmd.Path, err)
+		log.Error("Stderr: %s", errors)
 		log.Info("Read text: %v", lines)
 		return err, lines
 	}
